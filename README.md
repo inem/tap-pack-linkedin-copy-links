@@ -1,4 +1,4 @@
-# LinkedIn Copy links — v0.4.14
+# LinkedIn Copy links — v0.4.15
 
 One-click post links and native Save/Unsave using the feed's native icon-action presentation. The action
 sits beside the post menu, inherits its live presentation classes, and provides
@@ -118,3 +118,7 @@ made this path available on live company pages.
 Versions through 0.4.14 add promoted-card recognition and preserve the right-rail
 layout while hiding its native contents, leaving a stable slot for later local UI.
 All hiding operations observe remounts and restore native content on disposal.
+
+0.4.15 publishes the pack-owned `Post actions`, `Feed cleanup`, and `Menu cleanup`
+facts through `tap-pack-sdk/context`. A page-local inspector can project them;
+the pack remains independent of that presentation.
