@@ -1,6 +1,6 @@
 {
   "id": "linkedin.copy-links",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "intent": "Copy a post link or save/unsave the post directly from LinkedIn feed actions.",
   "license": "MIT",
   "page": "page.js",

@@ -14,9 +14,9 @@ export function promoted_badge(card) {
     if (text !== 'Promoted') return false;
     const actor = label.parentElement?.parentElement;
     if (!actor || actor === card) return false;
-    const links = [...actor.querySelectorAll('a[href]')];
-    return links.length === 2 && links[0].href === links[1].href &&
-      /^https:\/\/www\.linkedin\.com\/(company|in|showcase)\//.test(links[0].href) &&
-      actor.querySelectorAll('p').length <= 4;
+    const identityLinks = [...actor.querySelectorAll('a[href]')].filter(link =>
+      /^https:\/\/www\.linkedin\.com\/(company|in|showcase)\//.test(link.href));
+    return identityLinks.some((link, index) => identityLinks.slice(index + 1)
+      .some(other => other.href === link.href)) && actor.querySelectorAll('p').length <= 4;
   });
 }

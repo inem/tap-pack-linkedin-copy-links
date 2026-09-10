@@ -83,3 +83,18 @@ test('Promoted by company metadata is an ad, ordinary post prose is not', () => 
  label.childNodes=[{nodeType:3,textContent:'I was promoted by '},sponsor];
  expect(promoted_badge(domCard)).toBe(false);
 });
+
+test('exact Promoted metadata allows an additional profile CTA', () => {
+ const href='https://www.linkedin.com/in/example/';
+ const identity=()=>({href});
+ const actor={querySelectorAll:selector=>selector==='a[href]'
+   ? [identity(),identity(),{href:'https://www.linkedin.com/services/page/example/'}]
+   : [{},{},{}]};
+ const wrapper={parentElement:actor};
+ const label={textContent:'Promoted',childNodes:[{nodeType:3,textContent:'Promoted'}],
+   parentElement:wrapper,closest:()=>domCard,querySelectorAll:()=>[]};
+ const domCard={querySelectorAll:()=>[label]};
+ expect(promoted_badge(domCard)).toBe(true);
+ actor.querySelectorAll=selector=>selector==='a[href]' ? [identity()] : [{},{},{}];
+ expect(promoted_badge(domCard)).toBe(false);
+});

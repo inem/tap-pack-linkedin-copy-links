@@ -126,3 +126,7 @@ the pack remains independent of that presentation.
 0.4.16 moves those stable facts into the pack manifest. Core can now expose them
 without running feature-reporting JavaScript; runtime observations remain reserved
 for state that actually changes within a document.
+
+0.4.17 recognizes profile-sponsored cards whose header includes an additional
+service CTA. The check still stays within header metadata and requires a repeated
+LinkedIn actor identity, so ordinary post prose containing “Promoted” is untouched.
