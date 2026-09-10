@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><title>LinkedIn Copy — local verification</title>
+<style>body{font:16px system-ui;background:#f3f2ef;color:#222;max-width:780px;margin:32px auto}header,section{background:white;border:1px solid #ddd;border-radius:10px;padding:20px;margin:16px 0}button{margin:5px;padding:8px;cursor:pointer}.post-head{display:flex;align-items:center}.post-head strong{flex:1}#result{overflow-wrap:anywhere;white-space:pre-wrap}h1{font-size:24px}.native-action{display:flex;align-items:center;width:32px;height:32px;padding:0;margin:0;border:0;background:transparent;color:inherit;flex-shrink:0}.native-action:hover{background:#ddd}.native-action:focus-visible{outline:2px solid #0a66c2;outline-offset:2px}.native-content{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%}.native-icon{display:block} </style>
+<h1>Copy a LinkedIn post link</h1><p>Synthetic cards reproduce the captured SDUI binding. No LinkedIn requests.</p>
+<header>
+<button id="neighbor">Insert neighboring action</button><button id="slow">Delay clipboard</button><button id="settle">Complete clipboard</button><button id="hydrate">Finish hydration</button><button id="reuse">Replace first post</button><button id="insert">Insert known post</button><button id="unknown">Insert unknown post</button><button id="missing">Remove first identity</button><button id="refuse">Refuse clipboard</button><button id="allow">Allow clipboard</button><button id="reinjection">Reinject pack</button><button id="dispose">Remove pack controls</button><button id="real">Use real clipboard</button>
+<p id="result" role="status">No copy yet</p></header>
+<div data-testid="mainFeed" role="list"></div>
+<script id="rehydrate-data" type="text/plain"></script>
+<script>
+const feed=document.querySelector('[data-testid="mainFeed"]'),data=document.getElementById('rehydrate-data'),result=document.getElementById('result');
+const models=[]; let writes=0,refused=false,real=false,slow=false,pending;
+const nativeClipboard=navigator.clipboard;
+Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText(text){
+ writes++;result.textContent=JSON.stringify({text,writes,activation:navigator.userActivation.isActive,refused});
+ if(slow)return new Promise(resolve=>{pending=resolve;});
+ if(refused)return Promise.reject(new Error('Fixture refusal'));
+ if(real)return nativeClipboard.writeText(text);
+ return Promise.resolve();
+}}});
+document.execCommand=()=>false;
+function model(key,id,ad=false){return {role:'listitem',componentkey:key,children:[{buttonProps:{componentkey:'menu-'+key},triggers:[{action:{actions:[{requestId:'feedUpdateControlMenuRequest',requestedArguments:{payload:{updateKey:{items:[{feedUpdateUrn:ad?{updateUrnSponsoredContentV2Urn:{sponsoredEntity:'urn:li:activity:'+id}}:{updateUrnActivityUrn:{activityUrn:{activityId:id}}}}]}}}}]}}]}]};}
+function publish(){data.textContent='window.__como_rehydration__ = '+JSON.stringify([models.map((m,i)=>i.toString(16)+':'+JSON.stringify(m)+'\n').join('')]);}
+function card(key,label){const c=document.createElement('section');c.setAttribute('role','listitem');c.setAttribute('componentkey',key);const head=document.createElement('div');head.className='post-head';const name=document.createElement('strong');name.textContent=label;const menu=document.createElement('button');menu.type='button';menu.className='native-action';const span=document.createElement('span');span.className='native-content';const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('class','native-icon');icon.setAttribute('width','16');icon.setAttribute('height','16');span.append(icon);menu.append(span);menu.setAttribute('aria-label','Open control menu for post by Example');menu.setAttribute('componentkey','menu-'+key);head.append(name,menu);c.append(head);const p=document.createElement('p');p.textContent='Sample post text. Its native menu remains available.';c.append(p);return c;}
+models.push(model('first','1111111111111111111'),model('second','2222222222222222222'),model('advert','3333333333333333333',true),model('later','4444444444444444444'));
+publish();feed.append(card('first','First post'),card('second','Second post'),card('advert','Sponsored card — unsupported'));
+document.getElementById('neighbor').onclick=()=>{const b=document.createElement('button');b.textContent='Other feature';feed.firstElementChild.querySelector('button[componentkey]').before(b);};
+document.getElementById('slow').onclick=()=>{slow=true;result.textContent='Clipboard delayed';};
+document.getElementById('settle').onclick=()=>{slow=false;pending?.();};
+document.getElementById('hydrate').onclick=()=>data.remove();
+document.getElementById('reuse').onclick=()=>{const first=feed.firstElementChild;first.setAttribute('componentkey','later');first.querySelector('button[componentkey]').setAttribute('componentkey','menu-later');first.querySelector('strong').textContent='Replacement post';};
+document.getElementById('insert').onclick=()=>{if(!feed.querySelector('[componentkey="later"]'))feed.append(card('later','Later post'));};
+document.getElementById('unknown').onclick=()=>feed.append(card('unknown','Unknown identity — no Copy'));
+document.getElementById('missing').onclick=()=>feed.firstElementChild.querySelector('button[componentkey]').removeAttribute('componentkey');
+document.getElementById('refuse').onclick=()=>{refused=true;result.textContent='Clipboard refusal enabled';};
+document.getElementById('allow').onclick=()=>{refused=false;result.textContent='Clipboard available';};
+document.getElementById('real').onclick=()=>{real=true;result.textContent='Real clipboard enabled';};
+document.getElementById('dispose').onclick=()=>window.__tap_linkedin_copy_links?.dispose();
+document.getElementById('reinjection').onclick=()=>{const s=document.createElement('script');s.src='./pack/page.js?reload='+Date.now();document.body.append(s);};
+</script><script src="./pack/page.js"></script>

@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>LinkedIn Save fixture</title>
+<style>body{font:16px system-ui;max-width:700px;margin:30px auto}button{padding:8px;margin:4px}.head{display:flex;align-items:center}.head strong{flex:1}.native{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;background:transparent;color:inherit;padding:0}.native:hover{background:#ddd}.native:focus-visible{outline:2px solid blue}section{padding:20px;border:1px solid #ddd;margin:10px}[role=menuitem]{padding:12px;cursor:pointer}</style>
+<h1>Save through native post actions</h1>
+<button id="load">Load more</button><button id="stale">Stale next read</button><button id="refuse">Refuse save</button><button id="allow">Allow save</button><button id="delay">Delay menu</button><button id="replace">Replace first card</button><button id="reinject">Reinject pack</button><button id="dispose">Remove pack</button>
+<p id="result" role="status">No saves</p><div data-testid="mainFeed" role="list"></div><script id="rehydrate-data" type="text/plain"></script>
+<script>
+const feed=document.querySelector('[data-testid="mainFeed"]'),result=document.getElementById('result');let refuse=false,delay=false,writes=0,opens=0,stale=false,staleState;
+const saved=new Map(),models=[];
+function renderResult(){result.textContent=JSON.stringify({first:saved.get('first')||false,second:saved.get('second')||false,writes,opens});}
+function card(key,id){
+ const node=document.createElement('section');node.setAttribute('role','listitem');node.setAttribute('componentkey','expanded'+key);
+ const head=document.createElement('div');head.className='head';const name=document.createElement('strong');name.textContent=key+' post';
+ const b=document.createElement('button');b.className='native';b.type='button';b.setAttribute('componentkey','menu-'+key);b.setAttribute('aria-label','Post menu '+key);b.setAttribute('aria-expanded','false');const span=document.createElement('span');const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('width','16');icon.setAttribute('height','16');span.append(icon);b.append(span);head.append(name,b);node.append(head);feed.append(node);
+ function close(){document.getElementById('feedControlMenu'+key)?.remove();b.setAttribute('aria-expanded','false');}
+ b.onclick=()=>{if(b.getAttribute('aria-expanded')==='true'){close();return;}b.setAttribute('aria-expanded','true');opens++;renderResult();if(delay)return;
+ const displaySaved=staleState===undefined?saved.get(key):staleState;staleState=undefined;const portal=document.createElement('div');portal.id='feedControlMenu'+key;const menu=document.createElement('div');menu.setAttribute('role','menu');const item=document.createElement('div');item.setAttribute('role','menuitem');item.tabIndex=0;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id=displaySaved?'bookmark-fill-medium':'bookmark-outline-medium';item.append(svg,document.createTextNode(displaySaved?'Unsave':'Save'));menu.append(item);for(const [label,icon] of [['Copy link to post','link-medium'],['Other action','other-medium']]){const extra=document.createElement('div');extra.setAttribute('role','menuitem');extra.tabIndex=0;const glyph=document.createElementNS('http://www.w3.org/2000/svg','svg');glyph.id=icon;extra.append(glyph,document.createTextNode(label));menu.append(extra);}portal.append(menu);document.body.append(portal);
+ item.onclick=()=>{writes++;if(stale){staleState=saved.get(key)||false;stale=false;}if(!refuse)saved.set(key,!saved.get(key));renderResult();close();};};
+ models.push({role:'listitem',componentkey:'expanded'+key,children:[{buttonProps:{componentkey:'menu-'+key},triggers:[{requestId:'feedUpdateControlMenuRequest',requestedArguments:{payload:{updateKey:{items:[{feedUpdateUrn:{updateUrnActivityUrn:{activityUrn:{activityId:id}}}}]}}}}]}]});
+}
+card('first','1111111111111111111');card('second','2222222222222222222');document.getElementById('rehydrate-data').textContent='window.__como_rehydration__ = '+JSON.stringify([models.map((m,i)=>i+':'+JSON.stringify(m)+'\n').join('')]);
+document.getElementById('load').onclick=async()=>{const r=await fetch('/flagship-web/rsc-action/actions/pagination');await r.text();card('third','3333333333333333333');document.getElementById('load').disabled=true;};
+document.getElementById('stale').onclick=()=>stale=true;
+document.getElementById('refuse').onclick=()=>refuse=true;document.getElementById('allow').onclick=()=>{refuse=false;delay=false;};document.getElementById('delay').onclick=()=>delay=true;
+document.getElementById('replace').onclick=()=>feed.firstElementChild.setAttribute('componentkey','unknown');
+document.getElementById('dispose').onclick=()=>window.__tap_linkedin_copy_links?.dispose();document.getElementById('reinject').onclick=()=>{const s=document.createElement('script');s.src='./pack/page.js?'+Date.now();document.body.append(s);};
+</script><script src="./pack/page.js"></script>
