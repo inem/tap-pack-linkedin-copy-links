@@ -1,11 +1,16 @@
 {
   "id": "linkedin.copy-links",
-  "version": "0.4.15",
+  "version": "0.4.16",
   "intent": "Copy a post link or save/unsave the post directly from LinkedIn feed actions.",
   "license": "MIT",
   "page": "page.js",
   "files": [
     "LICENSE"
+  ],
+  "features": [
+    {"id": "post.actions", "label": "Post actions", "value": "Copy link · Save / Unsave"},
+    {"id": "feed.cleanup", "label": "Feed cleanup", "value": "Promoted posts · right rail"},
+    {"id": "menu.cleanup", "label": "Menu cleanup", "value": "Duplicate Copy / Save entries"}
   ],
   "access": {
     "origins": [
